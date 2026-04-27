@@ -1,0 +1,10 @@
+{
+    "settings": [
+        {
+        "provider": "desec",
+        "domain": "bergmal.net",
+        "token": "totallySafeToken@public.not"
+        }
+    ]
+}
+  
