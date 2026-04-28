@@ -1,10 +1,13 @@
 # Deployment Procedure: Rootless Podman on ZFS
 
-This guide documents the setup of a rootless Podman environment on an Ubuntu system using the ZFS filesystem.
+This guide documents the setup of a rootless Podman environment on an
+Ubuntu system using the ZFS filesystem.
 
 ## 1. System Installation
 
-Install the required packages. `uidmap` provides the tools for user namespace mapping, and `fuse-overlayfs` is required to run Podman storage on ZFS.
+Install the required packages. `uidmap` provides the tools for
+user namespace mapping, and `fuse-overlayfs` is required to run Podman storage
+on ZFS.
 
 ```bash
 # Update and install system dependencies
@@ -27,9 +30,24 @@ sudo adduser --disabled-password --gecos "" [podman-container-user-name]
 sudo loginctl enable-linger [podman-container-user-name]
 ```
 
+- **FYI:**
+
+  the command:
+
+  ```Bash
+  sudo adduser --disabled-password --gecos "" 
+  ```
+
+  - `--disabled-password` prevents the need for password, as it is not supposed
+    to be accessed through ssh.
+
+  - `--gecos "" ` sets general user info like name and phone number to be `""`
+    since it is not a "user" as in a "human" user.
+
 ## 3. Configure Sub-UID and Sub-GID
 
-Define the range of UIDs and GIDs the service user is allowed to use for its rootless containers.
+Define the range of UIDs and GIDs the service user is allowed to use for its
+rootless containers.
 
 ```bash
 # Assign 65,536 sub-IDs to the user and group
@@ -52,7 +70,7 @@ cat /etc/subuid | grep [podman-container-user-name]
     follows the convention:  
 
     ```bash
-    sudo usermod --add-subuids [start number]-[count] [podman-container-user-name
+    sudo usermod --add-subuids [start number]-[count] [podman-container-user-name]
     ```
 
     this is similar for both `add-subguids` and `add-subuids`. (do note the `g`
@@ -60,7 +78,8 @@ cat /etc/subuid | grep [podman-container-user-name]
 
 ## 4. User-Space Configuration
 
-Log in as the service user to configure the container storage driver and registry settings.
+Log in as the service user to configure the container storage driver and
+registry settings.
 
 ```bash
 # Switch to service user session
@@ -85,7 +104,8 @@ echo 'unqualified-search-registries = ["docker.io"]' > ~/.config/containers/regi
 
 ## 5. Folder Permissions & ID Mapping
 
-Because Podman is rootless, the internal container user (UID 1000) must be mapped to the host directory permissions.
+Because Podman is rootless, the internal container user (UID 1000)
+must be mapped to the host directory permissions.
 
 ```bash
 # Create the project data directory
