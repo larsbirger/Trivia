@@ -73,7 +73,7 @@ cat /etc/subuid | grep [podman-container-user-name]
     sudo usermod --add-subuids [start number]-[count] [podman-container-user-name]
     ```
 
-    this is similar for both `add-subguids` and `add-subuids`. (do note the `g`
+    this is similar for both `add-subgids` and `add-subuids`. (do note the `g`/`u`
     differentiating them.)
 
 ## 4. User-Space Configuration
