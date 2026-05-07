@@ -1,7 +1,3 @@
-Here is a complete breakdown of the network architecture we discussed, formatted as a Markdown document. It covers the logic, the configurations, and the "magic" of how the packets travel.
-
-***
-
 # 🌐 How Linux Routing & NAT Works: The "Device C" Bridge
 
 This guide explains how to turn a Linux machine (**Device C**) into a router that connects two private subnets to a WAN gateway (**Device D**).
