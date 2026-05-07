@@ -30,7 +30,32 @@ network:
         addresses: [8.8.8.8, 1.1.1.1]
 ```
 
-### Device C (The Router)
+keep in mind, the section:
+
+```yaml
+routes:
+        - to: default
+          via: 192.168.0.1  # Points to Device C
+```
+
+basically says that ghe gateway of this network is `192.168.0.1` the same way it does on you regular home router.
+
+### Device B (The second Client)
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses: [192.168.1.10/24]
+      routes:
+        - to: default
+          via: 192.168.1.1  # Points to Device C
+      nameservers:
+        addresses: [8.8.8.8, 1.1.1.1]
+```
+
+### Device C (The "Router")
 
 *Note: This config shows 3 physical interfaces (`eth0`, `eth1`, `eth2`). If you only had **one** interface, you would simply list all addresses under `eth0`.*
 
@@ -46,7 +71,7 @@ network:
       addresses: [192.168.2.10/24]
       routes:
         - to: default
-          via: 192.168.2.1  # Points to Device D (The Gateway)
+          via: 192.168.2.1  # Points to Device D (The "Gateway")
 ```
 
 ## 🚀 Enabling the "Engine" (Device C)
