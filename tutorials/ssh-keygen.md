@@ -49,3 +49,6 @@ cat ~/.ssh/file_name.pub
 | --- | --- | --- |
 | `file_name` | Private Key (Keep safe!) | The physical key in your pocket. |
 | `file_name.pub` | Public Key (Share freely) | The lock on the door. |
+
+> Do note that there are options with CA servers you should use if you
+  manage more than 1 person on 3-5 servers, but this procedure doesn't cover that.
