@@ -1,0 +1,11 @@
+{
+    "settings": [
+        {
+        "provider": "desec",
+        "domain": "bergmal.net",
+        "token": "totallySafeToken@public.not",
+        "ip_version": "ipv4",
+        "ipv6_suffix": ""
+        }
+    ]
+}
