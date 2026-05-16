@@ -1,0 +1,17 @@
+[Unit]
+Description=DDNS Updater Service (Dynamic Rootless)
+After=network-online.target
+
+[Container]
+Image=docker.io/qmcgaw/ddns-updater
+ContainerName=ddns-updater
+PublishPort=8000:8000/tcp
+Volume=%h/data:/updater/data:Z,U
+Environment=TZ=Europe/Oslo PUID=%U PGID=%U
+AutoUpdate=registry
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
