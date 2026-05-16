@@ -1,0 +1,16 @@
+services:
+  ddns-updater:
+    image: ghcr.io/qdm12/ddns-updater:v2.10
+    container_name: ddns-updater
+    restart: always
+    network_mode: bridge # Standard networking
+    ports:
+      - "8000:8000/tcp" # Web UI access external:internal port
+    volumes:
+      - ./data:/updater/data
+    environment:
+      - TZ=Europe/Oslo # Change to your timezone, e.g., Europe/Berlin
+      - PUID=1000 # Your user ID
+      - PGID=1000 # Your group ID
+    labels:
+      - "io.containers.autoupdate=registry" # Enables Podman auto-updates
