@@ -4,13 +4,13 @@ network:
   #renderer: NetworkManager
   renderer: networkd
   ethernets:
-    enp5s0:
+    ens18:
       dhcp4: false
       dhcp6: false
       match:
-        macaddress: d0:50:99:2c:f0:e1
+        macaddress: bc:24:11:38:cf:01
       addresses:
-        - 192.168.10.2/24
+        - 192.168.10.3/24
       routes:
         - to: default
           via: 192.168.10.1
