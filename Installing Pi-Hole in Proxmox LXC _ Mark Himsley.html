@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)https://mark.himsley.org/blog/2025/11/22/pihole-lxc-Debian-Trixi/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Installing Pi-Hole in Proxmox LXC | Mark Himsley</title>
+<meta name="generator" content="Jekyll v3.10.0">
+<meta property="og:title" content="Installing Pi-Hole in Proxmox LXC">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="A collection of notes and thoughts">
+<meta property="og:description" content="A collection of notes and thoughts">
+<link rel="canonical" href="https://mark.himsley.org/blog/2025/11/22/pihole-lxc-Debian-Trixi/">
+<meta property="og:url" content="https://mark.himsley.org/blog/2025/11/22/pihole-lxc-Debian-Trixi/">
+<meta property="og:site_name" content="Mark Himsley">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Installing Pi-Hole in Proxmox LXC">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A collection of notes and thoughts","headline":"Installing Pi-Hole in Proxmox LXC","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://avatars.githubusercontent.com/u/1175979"}},"url":"https://mark.himsley.org/blog/2025/11/22/pihole-lxc-Debian-Trixi/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/main.css"><link type="application/atom+xml" rel="alternate" href="https://mark.himsley.org/feed.xml" title="Mark Himsley"></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="https://mark.himsley.org/">Mark Himsley</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <h1 id="installing-pi-hole-in-proxmox-lxc">Installing Pi-Hole in Proxmox LXC</h1>
+
+<p>Tested on Proxmox v8.4.</p>
+
+<p>I’d recommend using Terraform to create and manage resources in Proxmox.
+Although, creating a Pi-Hole by hand is quite simple if you follow this guide.</p>
+
+<h2 id="ensure-proxmox-is-up-to-date">Ensure Proxmox is up to date</h2>
+
+<p>Ensure that Proxmox is up to date.
+If Proxmox is not up to date then there is a possibility that the creation of an LXC based on Debian Trixi will fail with the error:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TASK ERROR: ... unsupported debian version '13.1'
+</code></pre></div></div>
+
+<h2 id="create-lxc">Create LXC</h2>
+
+<p>Download the Container Template for Debian 13 Trixi:</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/containerTemplates-debian.png" alt="Container Templates"></p>
+
+<p>Use the <code class="language-plaintext highlighter-rouge">Create CT</code> button to create a new LXC container.</p>
+
+<p>Give the LXC a sensible hostname, set the password and optionally set an SSH public key.</p>
+
+<p>Use the Debian 13 template.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/createLXC-template.png" alt="Create LXC - Template"></p>
+
+<p>8GB of disk, 2 cores of CPU, 512 MB memory is fine.</p>
+
+<p>Pi-Hole is a service. I recommend allocating a static IPv4 and IPv6 (it’s 2025, you do have IPv6, yes?) address to services, but a static DHCP address is also a possibility.</p>
+
+<p>Set the next DNS server for the LXC. The up-stream DNS servers for Pi-Hole will be set later during Pi-Hole’s installation.</p>
+
+<p>After the LXC has been created, I also needed to change the options for the console mode to <code class="language-plaintext highlighter-rouge">shell</code> in order to reliably access the console.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/changeLXC-console-mode-shell.png" alt="Change LXC setting console mode to `shell`"></p>
+
+<h2 id="update-the-lxc-base-packages">Update the LXC base packages</h2>
+
+<p>Start the Pi-Hole LXC from Proxmox.</p>
+
+<p>Login at the console command-line, either using the Proxmox console or via SSH.
+The username will be <code class="language-plaintext highlighter-rouge">root</code> with the password or SSH key that was given when creating the LXC.</p>
+
+<p>Update Debian’s base packages:</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">apt update &amp;&amp; \
+apt -y full-upgrade &amp;&amp; \
+reboot
+</span></code></pre></div></div>
+
+<h2 id="install-pi-hole">Install Pi-Hole</h2>
+
+<p>Login at the console command-line again.</p>
+
+<p>Install Pi-Hole using their provided install script.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">apt install -y curl &amp;&amp; \
+curl -sSL https://install.pi-hole.net | bash
+</span></code></pre></div></div>
+
+<p>Note: it’s your server running on your network, you need to be happy to run the script from the Internet.
+Running random scripts from the Internet is bad.
+You should inspect the script first, to ensure you are happy that the script doesn’t present a security problem to you.</p>
+
+<p>Step through the graphical installation.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/Pi-Hole-welcome.png" alt="Pi-Hole Welcome"></p>
+
+<p>Select the upstream DNS provider you want Pi-Hole to use.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/Pi-Hole-dns-provider.png" alt="Pi-Hole DNS provider"></p>
+
+<p>If you have a custom DNS configuration it can be easily be configured.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/Pi-Hole-dns-custom.png" alt="Pi-Hole DNS custom"></p>
+
+<p>You are probably coming to Pi-Hole to use the managed lists of add sites to block.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/Pi-Hole-dns-lists.png" alt="Pi-Hole DNS lists"></p>
+
+<p>Select the logging levels that satisfy your requirements.</p>
+
+<p>After the installation is complete you will be presented with some admin access details.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/Pi-Hole-admin-details.png" alt="Pi-Hole admin details"></p>
+
+<p>You can use the provided password, write it down - it won’t be presented again.</p>
+
+<p>But instead I suggest set the password yourself at the console command-line, using the <code class="language-plaintext highlighter-rouge">pihole setpassword</code> command.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">root@pihole:~#</span><span class="w"> </span>pihole setpassword
+<span class="go">Enter New Password (Blank for no password):
+Confirm Password:
+  [✓] New password set
+</span></code></pre></div></div>
+
+<p>Still on the console command-line, use the <code class="language-plaintext highlighter-rouge">pihole -g</code> command to update the databases of hosts to block.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">root@pihole:~#</span><span class="w"> </span>pihole <span class="nt">-g</span>
+<span class="go">  [✓] DNS resolution is available
+
+  [i] Neutrino emissions detected...
+
+  [✓] Preparing new gravity database
+  [✓] Creating new gravity databases
+  [✓] Pulling blocklist source list into range
+  [i] Using libz compression
+
+  [i] Target: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+  [✓] Status: No changes detected
+  [✓] Parsed 97124 exact domains and 0 ABP-style domains (blocking, ignored 1 non-domain entries)
+      Sample of non-domain entries:
+        - fe80::1%lo0
+
+  [✓] Building tree
+  [i] Number of gravity domains: 97124 (97124 unique domains)
+  [i] Number of exact denied domains: 0
+  [i] Number of regex denied filters: 0
+  [i] Number of exact allowed domains: 0
+  [i] Number of regex allowed filters: 0
+  [✓] Optimizing database
+  [✓] Swapping databases
+  [✓] The old database remains available
+  [✓] Cleaning up stray matter
+
+  [✓] Done.
+</span></code></pre></div></div>
+
+<p>Now you can go to the admin dashboard web interface at the URL given above, login with the password you were given or set, and start to investigate.</p>
+
+<p><img src="./Installing Pi-Hole in Proxmox LXC _ Mark Himsley_files/Pi-Hole-dashboard.png" alt="Pi-Hole dashboard"></p>
+
+<h2 id="update-pi-hole">Update Pi-Hole</h2>
+
+<p>Login at the console command-line and use the <code class="language-plaintext highlighter-rouge">pihole -up</code> command.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">root@pihole:~#</span><span class="w"> </span>pihole <span class="nt">-up</span>
+<span class="go">  [✓] Building dependency package pihole-meta.deb
+  [✓] Installing Pi-hole dependency package
+
+  [i] Checking for updates...
+  [i] Pi-hole Core:	up to date
+  [i] Web Interface:	up to date
+  [i] FTL:		up to date
+
+  [✓] Everything is up to date!
+</span></code></pre></div></div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Mark Himsley</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mark Himsley</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A collection of notes and thoughts</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+
+</body></html>
