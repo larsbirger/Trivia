@@ -1,16 +1,28 @@
 # Jupyter to pdf
 
-1. install prereuisites
+1. Install prerequisites
 
-    ```Bash
-    sudo apt install pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic
-    ```
+    1. pandoc and latex to render `.ipynb` to `.pdf`
 
-    ```Bash
-    python3 -m pip install venv
-    ```
+        ```Bash
+        sudo apt install pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic
+        ```
 
-2. create, activate and set up up environment
+    2. pythons virtual environment for if wanted or needed
+
+        - if it can be installed globally through pip
+            
+            ```Bash
+            python3 -m pip install venv
+            ```
+
+        - if it needs to be installed through apt
+            
+            ```Bash
+            sudo apt install python3-venv
+            ```
+
+2. Create, activate and set up up environment
 
     1. create environment
 
@@ -51,5 +63,3 @@
     ```
 
     it creates a new file in same folder as target file
-
-
