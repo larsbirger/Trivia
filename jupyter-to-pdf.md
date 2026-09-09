@@ -1,4 +1,4 @@
-# yupyter to pdf
+# Jupyter to pdf
 
 1. install prereuisites
 
